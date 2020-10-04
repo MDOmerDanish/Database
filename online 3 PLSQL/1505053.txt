@@ -1,0 +1,97 @@
+
+
+
+
+
+1.
+
+
+
+
+CREATE OR REPLACE FUNCTION defaultCommissionPCT(MID IN NUMBER) 
+RETURN NUMBER IS
+JID NUMBER ;
+COMMISSION_PCT NUMBER ;
+
+BEGIN
+SELECT MANAGER_ID INTO JID
+FROM EMP1
+WHERE MANAGER_ID = MID ;
+IF JID >= 123 THEN 
+COMMISSION_PCT:= '0.0001' ;
+ELSIF JID>=110 AND JID<123 THEN
+COMMISSION_PCT:= '0.012' ;
+ELSE
+COMMISSION_PCT:= '0.1' ;
+END IF ;
+RETURN COMMISSION_PCT ; --return the message
+EXCEPTION
+
+WHEN NO_DATA_FOUND THEN
+RETURN 'No employee found.' ;
+WHEN OTHERS THEN
+RETURN 'Some unknown error occurred.' ;
+END ;
+/
+
+
+
+
+
+2.
+
+
+
+
+
+
+CREATE OR REPLACE PROCEDURE changeAll IS
+ID NUMBER;
+COMSN_PCT NUMBER ;
+BEGIN
+SELECT EMPLOYEE_ID INTO ID
+FROM EMP1
+WHERE EMPLOYEE_ID IS NOT NULL
+COMSN_PCT:=defaultCommissionPCT(ID);
+IF COMSN_PCT<> NULL THEN 
+DBMS_OUTPUT.PUT_LINE('COMMISSIONPCT IS NOT CHANGED') ;
+ELSE
+COMSN_PCT:='0.1'
+DBMS_OUTPUT.PUT_LINE('COMMISSIONPCT IS  CHANGED') ;
+END IF ;
+END ;
+/
+
+
+
+
+
+
+3.
+
+CREATE OR REPLACE TRIGGER CheckConsistency
+BEFORE INSERT
+ON COMMISSION_PCT
+FOR EACH ROW
+DECLARE
+BEGIN
+
+IF COMMISSION_PCT=NULL THEN
+COMMISSION_PCT:=defaultCommissionPCT (MANAGAR_ID)
+ELSE
+
+
+DBMS_OUTPUT.PUT_LINE('IT HAS ALREADY VALID COMMISSION _PCT') ;
+END ;
+/
+
+
+insert into EMP (employee_id, name, salary, commission_pct, manager_id, department_id) values (301, 'Mr A', 22000,  0.25, 122, 90);
+insert into EMP (employee_id, name, salary, manager_id, department_id) values (302, 'Mr B',18000, 122, 95);
+insert into EMP (employee_id, name, salary, manager_id, department_id) values (303, 'Mr C',7000, 170, 90);
+
+
+
+
+
+
